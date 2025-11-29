@@ -1,15 +1,17 @@
 package uzumtech.notification.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import uzumtech.notification.constant.enums.NotificationStatus;
+import uzumtech.notification.constant.enums.NotificationType;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "notifications")
 public class Notification {
@@ -18,22 +20,28 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String recipient;     // кому отправить
-    private String message;       // текст уведомления
+    @Enumerated(EnumType.STRING)
+    private NotificationStatus status;
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;
+
+    @Column(nullable = false)
+    private String text;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="merchant_id",nullable = false)
+    private Merchant merchant;
+
+    @Column(nullable = false)
+    private String recieverInfo;
+
+    @Column(nullable = false,updatable = false)
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Enumerated(EnumType.STRING)
-    private NotificationType type;     // EMAIL, SMS, PUSH
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
-    @Enumerated(EnumType.STRING)
-    private NotificationStatus status; // PENDING, SENT, FAILED
-
-    // Установка createdAt автоматически перед сохранением
-    @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        if (this.status == null) {
-            this.status = NotificationStatus.PENDING;
-        }
-    }
 }

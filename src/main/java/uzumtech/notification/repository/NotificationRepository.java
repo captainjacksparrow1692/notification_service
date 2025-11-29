@@ -3,8 +3,8 @@ package uzumtech.notification.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uzumtech.notification.entity.Notification;
-import uzumtech.notification.entity.NotificationStatus;
-import uzumtech.notification.entity.NotificationType;
+import uzumtech.notification.constant.enums.NotificationStatus;
+import uzumtech.notification.constant.enums.NotificationType;
 
 import java.util.List;
 
@@ -16,9 +16,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 
     // Найти уведомления по типу: EMAIL, SMS, PUSH
     List<Notification> findByType(NotificationType type);
-
-    // Найти уведомления по получателю
-    List<Notification> findByRecipient(String recipient);
 
     // Найти все PENDING (например для повторной отправки)
     List<Notification> findByStatusOrderByCreatedAtAsc(NotificationStatus status);

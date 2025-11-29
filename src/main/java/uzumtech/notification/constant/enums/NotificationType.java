@@ -1,4 +1,4 @@
-package uzumtech.notification.entity;
+package uzumtech.notification.constant.enums;
 
 public enum NotificationType {
     EMAIL,   // Отправка на email
