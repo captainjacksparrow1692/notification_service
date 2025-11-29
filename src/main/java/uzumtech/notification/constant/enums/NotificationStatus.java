@@ -1,4 +1,4 @@
-package uzumtech.notification.entity;
+package uzumtech.notification.constant.enums;
 
 public enum NotificationStatus {
     PENDING,   // уведомление создано и ожидает обработки Kafka Consumer
