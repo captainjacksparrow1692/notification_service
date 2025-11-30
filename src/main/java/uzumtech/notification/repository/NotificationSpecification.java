@@ -1,8 +1,8 @@
 package uzumtech.notification.repository;
 
 import uzumtech.notification.entity.Notification;
-import uzumtech.notification.entity.NotificationStatus;
-import uzumtech.notification.entity.NotificationType;
+import uzumtech.notification.constant.enums.NotificationType;
+import uzumtech.notification.constant.enums.NotificationStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
