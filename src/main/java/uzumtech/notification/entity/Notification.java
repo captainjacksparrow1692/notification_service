@@ -1,7 +1,9 @@
 package uzumtech.notification.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -10,6 +12,8 @@ import uzumtech.notification.constant.enums.NotificationType;
 
 import java.time.LocalDateTime;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -27,21 +31,27 @@ public class Notification {
     private NotificationType type;
 
     @Column(nullable = false)
-    private String text;
+    private String title;
+
+    @Column(nullable = false)
+    private String body;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="merchant_id",nullable = false)
+    @JoinColumn(name="merchant_id", nullable = false)
     private Merchant merchant;
 
     @Column(nullable = false)
     private String receiverInfo;
 
-    @Column(nullable = false,updatable = false)
+    private String message;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
 

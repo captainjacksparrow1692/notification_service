@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: notification
+  profiles:
+    default: local
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /index.html
+    enabled: true
+    doc-expansion: none
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  model-converters:
+    pageable-converter:
+      enabled: true

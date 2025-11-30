@@ -36,17 +36,15 @@ public class Merchant {
     @Column(nullable = false)
     private String taxNumber;
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     private String login;
 
     @Column(nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false,updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
     @UpdateTimestamp
     private LocalDateTime UpdatedAt;
 

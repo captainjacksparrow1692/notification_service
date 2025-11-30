@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/onlineshop
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service-group
+      auto-offset-reset: earliest
+    topic:
+      notification: notification-topic
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+openapi:
+  title: notification
+  version: 1.0.0
+  description: notification sender app
+  server-url: http://localhost:8080
+
+app:
+  firebase:
+    enabled: false
+    location: classpath:firebase/dev/notification.json

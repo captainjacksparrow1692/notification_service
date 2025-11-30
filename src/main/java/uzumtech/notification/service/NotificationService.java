@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import uzumtech.notification.constant.enums.NotificationStatus;
-import uzumtech.notification.dto.kafka.NotificationMessage;
+import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.repository.NotificationRepository;
 
@@ -33,11 +33,11 @@ public class NotificationService {
         Notification saved = repository.save(notification);
 
         // Формируем DTO для Kafka
-        NotificationMessage message = NotificationMessage.builder()
-                .notificationId(saved.getId())
-                .type(saved.getType().name())        // если type — enum
-                .text(saved.getText())
-                .recipient(saved.getRecipient())
+        NotificationSendRequestDto message = NotificationSendRequestDto.builder()
+                .type(saved.getType())        // если type — enum
+                .title(saved.getTitle())
+                .body(saved.getBody())
+                .receiver(saved.getRecipient())
                 .merchantId(saved.getMerchantId())
                 .build();
 
