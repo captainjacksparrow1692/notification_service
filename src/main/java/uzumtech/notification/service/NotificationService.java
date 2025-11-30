@@ -1,13 +1,13 @@
 package uzumtech.notification.service;
 
-import uzumtech.notification.constant.enums.NotificationStatus;
-import uzumtech.notification.entity.Notification;
-import uzumtech.notification.repository.NotificationRepository;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// Сервис для уведомлений: сохраняет их в базу и отправляет в Kafka
+import uzumtech.notification.constant.enums.NotificationStatus;
+import uzumtech.notification.dto.kafka.NotificationMessage;
+import uzumtech.notification.entity.Notification;
+import uzumtech.notification.repository.NotificationRepository;
+
 @Service
 public class NotificationService {
 
@@ -20,7 +20,6 @@ public class NotificationService {
         this.kafkaProducer = kafkaProducer;
     }
 
-    // Добавляет новое уведомление, ставит статус PENDING и отправляет в Kafka
     @Transactional
     public Notification queue(Notification notification) {
         if (notification == null) {
@@ -30,30 +29,35 @@ public class NotificationService {
         // Ставим статус PENDING
         notification.setStatus(NotificationStatus.PENDING);
 
-        // Сохраняем уведомление в базе
+        // Сохраняем в базе
         Notification saved = repository.save(notification);
 
-        // Отправляем уведомление в Kafka
-        kafkaProducer.send(saved);
+        // Формируем DTO для Kafka
+        NotificationMessage message = NotificationMessage.builder()
+                .notificationId(saved.getId())
+                .type(saved.getType().name())        // если type — enum
+                .text(saved.getText())
+                .recipient(saved.getRecipient())
+                .merchantId(saved.getMerchantId())
+                .build();
+
+        // Отправляем в Kafka
+        kafkaProducer.send(message);
 
         return saved;
     }
 
-    // Обновляет статус уведомления (например SENT или FAILED)
     @Transactional
     public Notification updateStatus(Long id, NotificationStatus status) {
         Notification notification = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Уведомление не найдено с id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Уведомление не найдено с id: " + id));
 
         notification.setStatus(status);
         return repository.save(notification);
     }
 
-    // Находит уведомление по id
     public Notification findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Уведомление не найдено с id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Уведомление не найдено с id: " + id));
     }
 }
