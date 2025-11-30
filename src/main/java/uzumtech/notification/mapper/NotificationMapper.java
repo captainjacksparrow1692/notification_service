@@ -1,6 +1,6 @@
 package uzumtech.notification.mapper;
 
-import org.apache.logging.log4j.util.Strings;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,6 +13,7 @@ import uzumtech.notification.repository.MerchantRepository;
 @Mapper(componentModel = "spring")
 public interface NotificationMapper {
 
+    @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
