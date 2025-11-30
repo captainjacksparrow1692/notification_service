@@ -1,27 +1,38 @@
 package uzumtech.notification.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import uzumtech.notification.entity.Notification;
-import uzumtech.notification.constant.enums.NotificationStatus;
-import uzumtech.notification.constant.enums.NotificationType;
+import uzumtech.notification.entity.NotificationStatus;
+import uzumtech.notification.entity.NotificationType;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
+public interface NotificationRepository extends JpaRepository<Notification, Long>,
+        JpaSpecificationExecutor<Notification> {
 
-    // Найти все уведомления по статусу (например, FAILED)
     List<Notification> findByStatus(NotificationStatus status);
 
-    // Найти уведомления по типу: EMAIL, SMS, PUSH
     List<Notification> findByType(NotificationType type);
 
-    // Найти все PENDING (например для повторной отправки)
     List<Notification> findByStatusOrderByCreatedAtAsc(NotificationStatus status);
 
-    // Найти только сообщения определённого типа и статуса
     List<Notification> findByTypeAndStatus(NotificationType type, NotificationStatus status);
 
+    @Query("""
+            SELECT n FROM Notification n
+            WHERE n.status = :status
+            ORDER BY n.createdAt ASC
+            """)
+    List<Notification> findForRetry(NotificationStatus status);
+
+    @Modifying
+    @Query("""
+            UPDATE Notification n
+            SET n.status = :status
+            WHERE n.id = :id
+            """)
+    void updateStatus(Long id, NotificationStatus status);
 }
 
