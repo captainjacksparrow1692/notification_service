@@ -1,10 +1,10 @@
-package com.example.notification.service;
+package uuzmtech.notification.service;
 
-import com.example.notification.entity.Notification;
-import com.example.notification.entity.NotificationStatus;
-import com.example.notification.entity.NotificationType;
-import com.example.notification.repository.NotificationRepository;
-import com.example.notification.repository.NotificationSpecification;
+import uzumtech.notification.entity.Notification;
+import uzumtech.notification.entity.NotificationStatus;
+import uzumtech.notification.entity.NotificationType;
+import uzumtech.notification.repository.NotificationRepository;
+import uzumtech.notification.repository.NotificationSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;

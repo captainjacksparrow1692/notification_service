@@ -1,8 +1,8 @@
-package com.example.notification.repository;
+package uzumtech.notification.repository;
 
-import com.example.notification.entity.Notification;
-import com.example.notification.entity.NotificationStatus;
-import com.example.notification.entity.NotificationType;
+import uzumtech.notification.entity.Notification;
+import uzumtech.notification.entity.NotificationStatus;
+import uzumtech.notification.entity.NotificationType;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 
