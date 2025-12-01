@@ -8,6 +8,7 @@ import org.mapstruct.Named;
 import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.entity.Merchant;
 import uzumtech.notification.entity.Notification;
+import uzumtech.notification.exception.merchant.MerchantNotFoundException;
 import uzumtech.notification.repository.MerchantRepository;
 
 /**
@@ -33,7 +34,7 @@ public interface NotificationMapper {
     @Named("merchantFromId")
     default Merchant mapMerchant(Long merchantId, @Context MerchantRepository merchantRepository) {
         return merchantRepository.findById(merchantId)
-            .orElseThrow(() -> new IllegalArgumentException("Merchant not found: " + merchantId));
+            .orElseThrow(() -> new MerchantNotFoundException("Merchant not found with id: " + merchantId));
     }
 
 }

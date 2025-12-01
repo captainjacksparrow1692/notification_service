@@ -19,8 +19,13 @@ public class NotificationConsumer {
 
     /**
      * Получение и обработка уведомлений из Kafka топика
+     * Запускаем 3 параллельных консьюмера для обработки из 3 партиций
      */
-    @KafkaListener(topics = "${app.kafka.topic.notification}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(
+            topics = "${app.kafka.topic.notification}",
+            groupId = "${spring.kafka.consumer.group-id}",
+            concurrency = "3"
+    )
     public void consume(NotificationSendRequestDto notification) {
         log.info("Получено сообщение из Kafka: merchantId={}, type={}, receiver={}",
                 notification.getMerchantId(), notification.getType(), notification.getReceiver());
