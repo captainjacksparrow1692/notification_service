@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uzumtech.notification.constant.enums.NotificationStatus;
 import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.entity.Notification;
+import uzumtech.notification.exception.notification.NotificationNotFoundException;
 import uzumtech.notification.repository.NotificationRepository;
 
 @Service
@@ -14,8 +15,7 @@ public class NotificationService {
     private final NotificationRepository repository;
     private final NotificationKafkaProducer kafkaProducer;
 
-    public NotificationService(NotificationRepository repository,
-                               NotificationKafkaProducer kafkaProducer) {
+    public NotificationService(NotificationRepository repository, NotificationKafkaProducer kafkaProducer) {
         this.repository = repository;
         this.kafkaProducer = kafkaProducer;
     }
@@ -50,7 +50,7 @@ public class NotificationService {
     @Transactional
     public Notification updateStatus(Long id, NotificationStatus status) {
         Notification notification = repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Уведомление не найдено с id: " + id));
+                .orElseThrow(() -> new NotificationNotFoundException("Notification not found with id: " + id));
 
         notification.setStatus(status);
         return repository.save(notification);
@@ -58,6 +58,6 @@ public class NotificationService {
 
     public Notification findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Уведомление не найдено с id: " + id));
+                .orElseThrow(() -> new NotificationNotFoundException("Notification not found with id: " + id));
     }
 }

@@ -22,19 +22,25 @@ public class NotificationKafkaProducer {
 
     /**
      * Отправить уведомление в Kafka топик
+     * Используем merchantId как ключ для гарантии порядка обработки
      */
     public void send(NotificationSendRequestDto message) {
         log.info("Отправка уведомления в Kafka: merchantId={}, type={}, receiver={}",
                 message.getMerchantId(), message.getType(), message.getReceiver());
 
-        kafkaTemplate.send(notificationTopic, message)
+        // Используем merchantId как ключ для партиционирования
+        String key = String.valueOf(message.getMerchantId());
+
+        kafkaTemplate.send(notificationTopic, key, message)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("Ошибка при отправке в Kafka: {}", ex.getMessage(), ex);
                     } else {
-                        log.info("Уведомление успешно отправлено в Kafka: topic={}, offset={}",
+                        log.info("Уведомление успешно отправлено в Kafka: topic={}, partition={}, offset={}, key={}",
                                 result.getRecordMetadata().topic(),
-                                result.getRecordMetadata().offset());
+                                result.getRecordMetadata().partition(),
+                                result.getRecordMetadata().offset(),
+                                key);
                     }
                 });
     }

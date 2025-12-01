@@ -31,6 +31,8 @@ app:
   kafka:
     topic:
       notification: notification-topic
+      partitions: 3
+      replication-factor: 1
   firebase:
     enabled: false
     location: classpath:firebase/local/notification.json
