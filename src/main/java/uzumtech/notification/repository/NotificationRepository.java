@@ -1,19 +1,19 @@
 package uzumtech.notification.repository;
 
+import org.springframework.data.jpa.repository.*;
+import org.springframework.stereotype.Repository;
 import uzumtech.notification.constant.enums.NotificationStatus;
 import uzumtech.notification.constant.enums.NotificationType;
 import uzumtech.notification.entity.Notification;
-import org.springframework.data.jpa.repository.*;
-import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Repository для работы с уведомлениями
- */
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long>,
         JpaSpecificationExecutor<Notification> {
+
+    // =================== Старые методы ===================
 
     // Поиск по статусу
     List<Notification> findByStatus(NotificationStatus status);
@@ -43,4 +43,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             WHERE n.id = :id
             """)
     void updateStatus(Long id, NotificationStatus status);
+
+    // =================== Новый метод ===================
+
+    // Поиск уведомлений по мерчанту, типу и диапазону дат
+    List<Notification> findAllByMerchantIdAndTypeAndCreatedAtBetween(
+            Long merchantId,
+            NotificationType type,
+            LocalDateTime start,
+            LocalDateTime end
+    );
+
+    List<Notification> findAllByMerchantIdAndTypeAndStatusAndCreatedAtBetween(Long merchantId, NotificationType notificationType, NotificationStatus notificationStatus, LocalDateTime start, LocalDateTime end);
 }

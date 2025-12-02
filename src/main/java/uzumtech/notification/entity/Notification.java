@@ -48,7 +48,7 @@ public class Notification {
 
     private String message;
 
-    //Добавляем цену за сообщение
+    // Добавляем цену за сообщение
     @Column(nullable = false)
     private Long price;
 
@@ -58,11 +58,23 @@ public class Notification {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    // Геттер для recipient (чтобы использовать в PriceService)
     public String getRecipient() {
         return receiverInfo;
     }
 
+    // Сеттер для recipient (чтобы можно было вызвать setRecipient)
+    public void setRecipient(String recipient) {
+        this.receiverInfo = recipient;
+    }
+
+    // Геттер для merchantId
     public Long getMerchantId() {
         return merchant != null ? merchant.getId() : null;
+    }
+
+    // Сеттер для merchant (если нужно создавать уведомления вручную)
+    public void setMerchant(Merchant merchant) {
+        this.merchant = merchant;
     }
 }

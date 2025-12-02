@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uzumtech.notification.constant.enums.NotificationStatus;
+import uzumtech.notification.constant.enums.NotificationType;
 import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.entity.Price;
 import uzumtech.notification.exception.notification.NotificationNotFoundException;
 import uzumtech.notification.repository.NotificationRepository;
 import uzumtech.notification.service.kafka.producer.NotificationKafkaProducer;
+import uzumtech.notification.service.price.PriceService;
 
 /**
  * Сервис для обработки уведомлений и отправки событий в Kafka + бизнес-логика цены
@@ -27,6 +29,7 @@ public class NotificationService {
      */
     @Transactional
     public Notification send(Notification notification) {
+        Long priceValue;
 
         if (notification == null) {
             throw new IllegalArgumentException("Notification не может быть null");
@@ -35,12 +38,15 @@ public class NotificationService {
             throw new IllegalArgumentException("Recipient не может быть пустым");
         }
 
-        // ============================
         //    БИЗНЕС-ЛОГИКА PRICE
-        // ============================
-        Price price = priceService.getActivePrice();   // например 85 сум
+        if (notification.getType() == NotificationType.SMS) {
+            Price price = priceService.getActivePrice();  // только для SMS
+            priceValue = price.getPrice().longValue();
+        } else {
+            priceValue = 0L; // EMAIL и PUSH бесплатные
+        }
 
-        notification.setPrice((price.getPrice()));       // сохраняем цену в уведомление
+        notification.setPrice(priceValue);
 
         // Устанавливаем статус
         notification.setStatus(NotificationStatus.QUEUED);
