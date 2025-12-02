@@ -1,11 +1,9 @@
 package uzumtech.notification.service.sender;
 
-import com.google.firebase.messaging.BatchResponse;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uzumtech.notification.constant.enums.NotificationStatus;
@@ -19,8 +17,9 @@ import uzumtech.notification.mapper.NotificationMapper;
 import uzumtech.notification.repository.MerchantRepository;
 import uzumtech.notification.repository.NotificationRepository;
 
-
-@Slf4j
+/**
+ * Логирование вынесено в ServiceLoggingAspect
+ */
 @Service
 @RequiredArgsConstructor
 public class PushNotificationSender implements NotificationSender {
@@ -67,13 +66,8 @@ public class PushNotificationSender implements NotificationSender {
 
             var response = firebaseMessaging.send(message);
 
-            log.info("Firebase notification sent to {} device",
-                notificationDto.getReceiver()
-            );
-
             return new PushResult(NotificationStatus.SENT, response, true);
         } catch (FirebaseMessagingException e) {
-            log.error("Firebase notification multicast sending error: {}", e.getMessage(), e);
             return new PushResult(NotificationStatus.FAILED, e.getMessage(), false);
         }
     }

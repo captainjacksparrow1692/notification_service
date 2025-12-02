@@ -2,7 +2,6 @@ package uzumtech.notification.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +14,8 @@ import uzumtech.notification.service.NotificationService;
 
 /**
  * Контроллер для отправки уведомлений
+ * Логирование вынесено в ControllerLoggingAspect
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
@@ -31,16 +30,12 @@ public class NotificationController {
      */
     @PostMapping("/send")
     public ResponseEntity<ResponseDto<Long>> sendNotification(@Valid @RequestBody NotificationSendRequestDto request) {
-        log.info("Получен запрос на отправку уведомления: merchantId={}, type={}, receiver={}",
-                request.getMerchantId(), request.getType(), request.getReceiver());
-
         // Преобразуем DTO в entity
         Notification notification = notificationMapper.toEntity(request, merchantRepository);
 
         // Сохраняем в БД и отправляем в Kafka
-        Notification saved = notificationService.send(notification);
 
-        log.info("Уведомление добавлено в очередь: id={}, status={}", saved.getId(), saved.getStatus());
+        Notification saved = notificationService.send(notification);
 
         // Возвращаем ID созданного уведомления
         return ResponseEntity
@@ -51,8 +46,6 @@ public class NotificationController {
     // Получить уведомление по ID
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto<Notification>> getNotification(@PathVariable Long id) {
-        log.info("Получен запрос на получение уведомления: id={}", id);
-
         Notification notification = notificationService.findById(id);
 
         return ResponseEntity.ok(ResponseDto.createSuccessResponse(notification));
