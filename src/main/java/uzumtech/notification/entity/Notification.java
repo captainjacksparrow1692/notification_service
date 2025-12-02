@@ -50,7 +50,7 @@ public class Notification {
 
     //Добавляем цену за сообщение
     @Column(nullable = false)
-    private Integer price;
+    private Long price;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
