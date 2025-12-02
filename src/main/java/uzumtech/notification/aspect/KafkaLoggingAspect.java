@@ -21,14 +21,14 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaLoggingAspect {
 
     // Логирование перед отправкой в Kafka
-    @Before(value = "execution(* uzumtech.notification.service.NotificationKafkaProducer.send(..)) && args(message)", argNames = "message")
+    @Before(value = "execution(* uzumtech.notification.service.kafka.producer.NotificationKafkaProducer.send(..)) && args(message)", argNames = "message")
     public void logBeforeKafkaSend(NotificationSendRequestDto message) {
         log.info("Отправка уведомления в Kafka: merchantId={}, type={}, receiver={}",
                 message.getMerchantId(), message.getType(), message.getReceiver());
     }
 
     // Логирование после отправки в Kafka
-    @AfterReturning(pointcut = "execution(* org.springframework.kafka.core.KafkaTemplate.send(..)) && within(uzumtech.notification.service.NotificationKafkaProducer)", returning = "result", argNames = "joinPoint,result")
+    @AfterReturning(pointcut = "execution(* org.springframework.kafka.core.KafkaTemplate.send(..)) && within(uzumtech.notification.service.kafka.producer.NotificationKafkaProducer)", returning = "result", argNames = "joinPoint,result")
     public void logAfterKafkaSend(JoinPoint joinPoint, Object result) {
         if (result instanceof CompletableFuture<?> future) {
             // Добавляем обработчик успеха/ошибки

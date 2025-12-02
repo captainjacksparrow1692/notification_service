@@ -9,6 +9,7 @@ import uzumtech.notification.entity.Notification;
 import uzumtech.notification.entity.Price;
 import uzumtech.notification.exception.notification.NotificationNotFoundException;
 import uzumtech.notification.repository.NotificationRepository;
+import uzumtech.notification.service.kafka.producer.NotificationKafkaProducer;
 
 /**
  * Сервис для обработки уведомлений и отправки событий в Kafka + бизнес-логика цены

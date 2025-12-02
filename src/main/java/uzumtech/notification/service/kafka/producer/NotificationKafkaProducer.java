@@ -1,4 +1,4 @@
-package uzumtech.notification.service;
+package uzumtech.notification.service.kafka.producer;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
