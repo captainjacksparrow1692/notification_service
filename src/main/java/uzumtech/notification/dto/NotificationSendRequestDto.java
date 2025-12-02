@@ -30,4 +30,7 @@ public class NotificationSendRequestDto {
 
     @NotBlank(message = "Receiver is required")
     private String receiver;
+
+    @NotNull(message = "Price is required")
+    private Long price;
 }

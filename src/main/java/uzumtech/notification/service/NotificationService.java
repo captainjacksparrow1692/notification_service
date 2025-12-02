@@ -39,7 +39,7 @@ public class NotificationService {
         // ============================
         Price price = priceService.getActivePrice();   // например 85 сум
 
-        notification.setPrice(price.getPrice());       // сохраняем цену в уведомление
+        notification.setPrice(Math.toIntExact(price.getPrice()));       // сохраняем цену в уведомление
 
         // Устанавливаем статус
         notification.setStatus(NotificationStatus.QUEUED);
@@ -54,7 +54,7 @@ public class NotificationService {
                 .body(saved.getBody())
                 .receiver(saved.getRecipient())
                 .merchantId(saved.getMerchantId())
-                .price(saved.getPrice()) // цена уходит в Kafka-сообщение
+                .price(saved.getPrice().longValue()) // цена уходит в Kafka-сообщение
                 .build();
 
         // Асинхронная отправка
