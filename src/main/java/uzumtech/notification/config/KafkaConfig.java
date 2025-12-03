@@ -53,8 +53,18 @@ public class KafkaConfig {
         return new DefaultKafkaProducerFactory<>(config);
     }
 
-    @Bean
-    public KafkaTemplate<String, NotificationSendRequestDto> kafkaTemplate() {
+    @Bean("smsKafkaTemplate")
+    public KafkaTemplate<String, NotificationSendRequestDto> smsKafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean("pushKafkaTemplate")
+    public KafkaTemplate<String, NotificationSendRequestDto> pushKafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean("emailKafkaTemplate")
+    public KafkaTemplate<String, NotificationSendRequestDto> emailKafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 

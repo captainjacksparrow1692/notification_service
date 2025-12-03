@@ -8,13 +8,20 @@ import org.springframework.kafka.config.TopicBuilder;
 
 /**
  * Конфигурация топиков Kafka
- * Автоматически создает топик с нужным количеством партиций
+ * Автоматически создает 3 отдельных топика для SMS, Push и Email уведомлений
+ * Каждый топик имеет 3 партиции для параллельной обработки
  */
 @Configuration
 public class KafkaTopicConfig {
 
-    @Value("${app.kafka.topic.notification}")
-    private String notificationTopic;
+    @Value("${app.kafka.topic.sms}")
+    private String smsTopic;
+
+    @Value("${app.kafka.topic.push}")
+    private String pushTopic;
+
+    @Value("${app.kafka.topic.email}")
+    private String emailTopic;
 
     @Value("${app.kafka.topic.partitions}")
     private Integer partitions;
@@ -23,13 +30,39 @@ public class KafkaTopicConfig {
     private Integer replicationFactor;
 
     /**
-     * Создание топика для уведомлений с 3 партициями
-     * Это гарантирует что 3 консьюмера смогут обрабатывать сообщения параллельно
+     * Создание топика для SMS уведомлений
+     * 3 партиции для параллельной обработки по merchantId
      */
     @Bean
-    public NewTopic notificationTopic() {
+    public NewTopic smsTopic() {
         return TopicBuilder
-                .name(notificationTopic)
+                .name(smsTopic)
+                .partitions(partitions)
+                .replicas(replicationFactor)
+                .build();
+    }
+
+    /**
+     * Создание топика для Push уведомлений
+     * 3 партиции для параллельной обработки по merchantId
+     */
+    @Bean
+    public NewTopic pushTopic() {
+        return TopicBuilder
+                .name(pushTopic)
+                .partitions(partitions)
+                .replicas(replicationFactor)
+                .build();
+    }
+
+    /**
+     * Создание топика для Email уведомлений
+     * 3 партиции для параллельной обработки по merchantId
+     */
+    @Bean
+    public NewTopic emailTopic() {
+        return TopicBuilder
+                .name(emailTopic)
                 .partitions(partitions)
                 .replicas(replicationFactor)
                 .build();

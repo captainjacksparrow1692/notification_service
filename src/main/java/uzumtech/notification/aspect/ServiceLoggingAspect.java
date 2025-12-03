@@ -11,6 +11,7 @@ import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.dto.push.NotificationSendResponseDto;
 import uzumtech.notification.dto.ResponseDto;
 
+
 // Аспект для логирования методов сервисов
 // Перенес сюда логирование из PushNotificationSender и NotificationConsumer
 @Aspect
@@ -18,8 +19,8 @@ import uzumtech.notification.dto.ResponseDto;
 @Slf4j
 public class ServiceLoggingAspect {
 
-    // Логирование получения сообщений из Kafka в NotificationConsumer
-    @Before(value = "execution(* uzumtech.notification.service.kafka.consumer.NotificationConsumer.consume(..)) && args(notification)", argNames = "notification")
+    // Логирование получения сообщений из Kafka во всех Consumer'ах
+    @Before(value = "execution(* uzumtech.notification.service.kafka.consumer.*Consumer.consume(..)) && args(notification)", argNames = "notification")
     public void logBeforeKafkaConsume(NotificationSendRequestDto notification) {
         log.info("Получено сообщение из Kafka: merchantId={}, type={}, receiver={}",
                 notification.getMerchantId(), notification.getType(), notification.getReceiver());
@@ -45,8 +46,8 @@ public class ServiceLoggingAspect {
         }
     }
 
-    // Логирование ошибок при обработке уведомления в NotificationConsumer
-    @AfterThrowing(pointcut = "execution(* uzumtech.notification.service.kafka.consumer.NotificationConsumer.consume(..)) && args(notification)", throwing = "error", argNames = "notification,error")
+    // Логирование ошибок при обработке уведомления во всех Consumer'ах
+    @AfterThrowing(pointcut = "execution(* uzumtech.notification.service.kafka.consumer.*Consumer.consume(..)) && args(notification)", throwing = "error", argNames = "notification,error")
     public void logKafkaConsumeError(NotificationSendRequestDto notification, Throwable error) {
         log.error("Ошибка при обработке уведомления: merchantId={}, receiver={}, error={}",
                 notification.getMerchantId(), notification.getReceiver(), error.getMessage(), error);

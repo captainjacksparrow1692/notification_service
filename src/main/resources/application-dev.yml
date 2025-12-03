@@ -31,7 +31,9 @@ openapi:
 app:
   kafka:
     topic:
-      notification: notification-topic
+      sms: sms-topic
+      push: push-topic
+      email: email-topic
       partitions: 3
       replication-factor: 1
   firebase:
