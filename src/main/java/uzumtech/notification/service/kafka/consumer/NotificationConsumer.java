@@ -3,7 +3,7 @@ package uzumtech.notification.service.kafka.consumer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import uzumtech.notification.dto.NotificationSendRequestDto;
+import uzumtech.notification.dto.push.NotificationSendRequestDto;
 import uzumtech.notification.service.sender.NotificationGeneratorFactory;
 
 /**

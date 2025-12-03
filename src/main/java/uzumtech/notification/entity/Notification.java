@@ -54,6 +54,8 @@ public class Notification {
     @Column(nullable = false)
     private Long price;
 
+    private LocalDateTime deliveredAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
