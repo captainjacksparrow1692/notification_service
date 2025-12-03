@@ -8,7 +8,7 @@ import org.springframework.web.client.RestClient;
 import uzumtech.notification.constant.enums.NotificationStatus;
 import uzumtech.notification.constant.enums.NotificationType;
 import uzumtech.notification.dto.ResponseDto;
-import uzumtech.notification.dto.push.NotificationSendRequestDto;
+import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.dto.push.NotificationSendResponseDto;
 import uzumtech.notification.dto.sms.SendSmsResponse;
 import uzumtech.notification.entity.Notification;

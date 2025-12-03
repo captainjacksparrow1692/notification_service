@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uzumtech.notification.constant.enums.NotificationStatus;
 import uzumtech.notification.constant.enums.NotificationType;
-import uzumtech.notification.dto.push.NotificationSendRequestDto;
+import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.dto.push.NotificationSendResponseDto;
 import uzumtech.notification.dto.push.PushResult;
 import uzumtech.notification.dto.ResponseDto;

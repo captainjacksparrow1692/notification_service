@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-import uzumtech.notification.dto.push.NotificationSendRequestDto;
+import uzumtech.notification.dto.NotificationSendRequestDto;
 
 import java.util.concurrent.CompletableFuture;
 
