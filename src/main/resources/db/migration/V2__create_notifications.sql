@@ -11,12 +11,23 @@ CREATE TABLE merchants (
                            updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- ТАБЛИЦА ТАРИФОВ
+-- ТАБЛИЦА ТАРИФОВ (ДОРАБОТАНО)
 CREATE TABLE prices (
                         id BIGSERIAL PRIMARY KEY,
+
                         price BIGINT NOT NULL CHECK (price >= 0),
+
+    -- текущая активная цена (end_date IS NULL)
                         is_active BOOLEAN NOT NULL DEFAULT TRUE,
-                        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+
+    -- когда создана запись
+                        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    -- когда цена начала действовать
+                        start_date TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    -- когда перестала действовать (NULL = активная)
+                        end_date TIMESTAMP NULL
 );
 
 -- КАНАЛЫ ДОСТАВКИ (email, sms, push и т.д.)
@@ -31,7 +42,7 @@ CREATE TABLE notification_channel_settings (
                                                id BIGSERIAL PRIMARY KEY,
                                                merchant_id BIGINT REFERENCES merchants(id) ON DELETE CASCADE,
                                                channel_id BIGINT REFERENCES notification_channels(id) ON DELETE CASCADE,
-                                               config JSONB, -- например API ключ для SMS или SMTP настройки
+                                               config JSONB,
                                                UNIQUE (merchant_id, channel_id)
 );
 
@@ -41,7 +52,7 @@ CREATE TABLE notification_templates (
                                         merchant_id BIGINT REFERENCES merchants(id) ON DELETE CASCADE,
                                         title VARCHAR(255) NOT NULL,
                                         body TEXT NOT NULL,
-                                        type VARCHAR(50), ---- например: INFO / WARNING / AD / SYSTEM
+                                        type VARCHAR(50),
                                         created_at TIMESTAMP DEFAULT NOW(),
                                         updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -55,17 +66,17 @@ CREATE TABLE notifications (
                                title VARCHAR(255) NOT NULL,
                                body TEXT NOT NULL,
                                status VARCHAR(50) NOT NULL, -- CREATED / QUEUED / SENT / FAILED
-                               receiver VARCHAR(255) NOT NULL, -- например email или номер телефона
+                               receiver VARCHAR(255) NOT NULL,
                                price BIGINT NOT NULL CHECK (price >= 0),
                                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
                                updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- ЛОГИ ОТПРАВОК (каждый retry — отдельная запись)
+-- ЛОГИ ОТПРАВОК
 CREATE TABLE notification_logs (
                                    id BIGSERIAL PRIMARY KEY,
                                    notification_id BIGINT REFERENCES notifications(id) ON DELETE CASCADE,
-                                   status VARCHAR(50) NOT NULL, -- SENT / FAILED / RETRY
+                                   status VARCHAR(50) NOT NULL,
                                    response TEXT,
                                    created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
@@ -81,3 +92,8 @@ CREATE INDEX idx_logs_notification_id ON notification_logs(notification_id);
 
 CREATE INDEX idx_channel_settings_merchant_id ON notification_channel_settings(merchant_id);
 CREATE INDEX idx_channel_settings_channel_id ON notification_channel_settings(channel_id);
+
+-- ИСТОРИИ ЦЕН — ВАЖНЫЕ ИНДЕКСЫ
+CREATE INDEX idx_prices_start_date ON prices(start_date);
+CREATE INDEX idx_prices_end_date ON prices(end_date);
+CREATE INDEX idx_prices_is_active ON prices(is_active);

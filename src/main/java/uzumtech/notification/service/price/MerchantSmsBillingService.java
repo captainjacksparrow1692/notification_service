@@ -7,7 +7,6 @@ import uzumtech.notification.constant.enums.NotificationStatus;
 import uzumtech.notification.constant.enums.NotificationType;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.repository.NotificationRepository;
-import uzumtech.notification.service.price.PriceService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,15 +20,14 @@ public class MerchantSmsBillingService {
     private final PriceService priceService;
 
     /**
-     * Рассчитать сумму за отправленные SMS уведомления мерчанта за период
+     * Рассчитать сумму за отправленные SMS, учитывая исторические цены.
      */
     public Long calculateSmsCost(Long merchantId, LocalDate from, LocalDate to) {
-        Long smsPrice = priceService.getPricePerSms();
 
         LocalDateTime start = from.atStartOfDay();
         LocalDateTime end = to.atTime(23, 59, 59);
 
-        // Только отправленные SMS
+        // получаем SMS за период
         List<Notification> sentSms = notificationRepository
                 .findAllByMerchantIdAndTypeAndStatusAndCreatedAtBetween(
                         merchantId,
@@ -39,7 +37,15 @@ public class MerchantSmsBillingService {
                         end
                 );
 
-        return smsPrice * sentSms.size();
+        long total = 0L;
+
+        // для каждой SMS — своя цена
+        for (Notification sms : sentSms) {
+            Long priceOnDate = priceService.getPriceAt(sms.getCreatedAt());
+            total += priceOnDate;
+        }
+
+        return total;
     }
 
     /**
@@ -58,4 +64,3 @@ public class MerchantSmsBillingService {
         notificationRepository.save(notification);
     }
 }
-
