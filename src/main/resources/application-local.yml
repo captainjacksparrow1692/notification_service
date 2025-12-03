@@ -35,7 +35,7 @@ app:
       partitions: 3
       replication-factor: 1
   firebase:
-    enabled: false
+    enabled: true
     location: classpath:firebase/local/notification.json
   provider:
     url: https://notify.eskiz.uz/api/
