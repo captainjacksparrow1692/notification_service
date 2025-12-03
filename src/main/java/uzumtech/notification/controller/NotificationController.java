@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uzumtech.notification.dto.NotificationSendRequestDto;
+import uzumtech.notification.dto.push.NotificationSendRequestDto;
 import uzumtech.notification.dto.ResponseDto;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.mapper.NotificationMapper;

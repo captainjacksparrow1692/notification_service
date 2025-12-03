@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import uzumtech.notification.dto.NotificationSendRequestDto;
+import uzumtech.notification.dto.push.NotificationSendRequestDto;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.mapper.NotificationMapper;
 import uzumtech.notification.repository.MerchantRepository;
