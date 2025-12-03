@@ -1,4 +1,4 @@
-package uzumtech.notification.dto;
+package uzumtech.notification.dto.push;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,17 +1,23 @@
 package uzumtech.notification.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uzumtech.notification.constant.enums.NotificationStatus;
 import uzumtech.notification.constant.enums.NotificationType;
-import uzumtech.notification.dto.NotificationSendRequestDto;
+import uzumtech.notification.dto.push.NotificationSendRequestDto;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.entity.Price;
 import uzumtech.notification.exception.notification.NotificationNotFoundException;
 import uzumtech.notification.repository.NotificationRepository;
+import uzumtech.notification.repository.specification.NotificationSpecification;
 import uzumtech.notification.service.kafka.producer.NotificationKafkaProducer;
 import uzumtech.notification.service.price.PriceService;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Сервис для обработки уведомлений и отправки событий в Kafka + бизнес-логика цены
@@ -29,7 +35,7 @@ public class NotificationService {
      */
     @Transactional
     public Notification send(Notification notification) {
-        Long priceValue;
+        Long priceValue = 0L;
 
         if (notification == null) {
             throw new IllegalArgumentException("Notification не может быть null");
@@ -41,9 +47,7 @@ public class NotificationService {
         //    БИЗНЕС-ЛОГИКА PRICE
         if (notification.getType() == NotificationType.SMS) {
             Price price = priceService.getActivePrice();  // только для SMS
-            priceValue = price.getPrice().longValue();
-        } else {
-            priceValue = 0L; // EMAIL и PUSH бесплатные
+            priceValue = price.getPrice();
         }
 
         notification.setPrice(priceValue);
@@ -108,5 +112,53 @@ public class NotificationService {
     public Notification findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotificationNotFoundException("Notification not found with id: " + id));
+    }
+
+    /**
+     * Получить уведомления с фильтром по статусу, типу и диапазону дат
+     * с постраничной пагинацией
+     */
+    public Page<Notification> findAllPaged(
+        NotificationStatus status,
+        NotificationType type,
+        LocalDateTime from,
+        LocalDateTime to,
+        Pageable pageable
+    ) {
+        return repository.findAll(
+            NotificationSpecification.byFilter(status, type, from, to),
+            pageable
+        );
+    }
+
+    /**
+     * Сохранить новое уведомление
+     */
+    @Transactional
+    public Notification save(Notification notification) {
+        return repository.save(notification);
+    }
+
+    /**
+     * Получить уведомления для повторной отправки
+     */
+    public List<Notification> findForRetry(NotificationStatus status) {
+        return repository.findForRetry(status);
+    }
+
+    /**
+     * Получить все SMS уведомления мерчанта за определённый период
+     */
+    public List<Notification> findAllSmsByMerchantAndPeriod(
+        Long merchantId,
+        LocalDateTime start,
+        LocalDateTime end
+    ) {
+        return repository.findAllByMerchantIdAndTypeAndCreatedAtBetween(
+            merchantId,
+            NotificationType.SMS,
+            start,
+            end
+        );
     }
 }

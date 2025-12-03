@@ -37,3 +37,5 @@ app:
   firebase:
     enabled: false
     location: classpath:firebase/dev/notification.json
+  provider:
+    url: https://notify.eskiz.uz/api/

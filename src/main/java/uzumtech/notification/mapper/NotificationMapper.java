@@ -5,7 +5,7 @@ import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
-import uzumtech.notification.dto.NotificationSendRequestDto;
+import uzumtech.notification.dto.push.NotificationSendRequestDto;
 import uzumtech.notification.entity.Merchant;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.exception.merchant.MerchantNotFoundException;
