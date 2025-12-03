@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uzumtech.notification.constant.enums.NotificationStatus;
 import uzumtech.notification.constant.enums.NotificationType;
-import uzumtech.notification.dto.NotificationSendRequestDto;
-import uzumtech.notification.dto.NotificationSendResponseDto;
-import uzumtech.notification.dto.PushResult;
+import uzumtech.notification.dto.push.NotificationSendRequestDto;
+import uzumtech.notification.dto.push.NotificationSendResponseDto;
+import uzumtech.notification.dto.push.PushResult;
 import uzumtech.notification.dto.ResponseDto;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.mapper.NotificationMapper;
@@ -19,6 +19,7 @@ import uzumtech.notification.repository.NotificationRepository;
 
 /**
  * Логирование вынесено в ServiceLoggingAspect
+ * Сервис для отправки push уведомлений
  */
 @Service
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class PushNotificationSender implements NotificationSender {
         Notification entity = notificationMapper.toEntity(
             notificationDto, merchantRepository);
 
+        //отправка уведомлений и получение результата
         var result = sendPush(notificationDto);
 
         entity.setStatus(result.getStatus());
@@ -54,6 +56,7 @@ public class PushNotificationSender implements NotificationSender {
         return NotificationType.PUSH;
     }
 
+    // метод для отправки push уведомлений
     private PushResult sendPush(NotificationSendRequestDto notificationDto) {
         try {
             Message message = Message.builder()
