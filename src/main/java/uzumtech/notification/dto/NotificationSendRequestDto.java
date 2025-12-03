@@ -33,4 +33,10 @@ public class NotificationSendRequestDto {
 
     @NotNull(message = "Price is required")
     private Long price;
+
+    public NotificationSendRequestDto(String merchant1, String testMessage, String email) {
+        this.receiver = merchant1;
+        this.body = testMessage;
+        this.type = NotificationType.valueOf(email);
+    }
 }

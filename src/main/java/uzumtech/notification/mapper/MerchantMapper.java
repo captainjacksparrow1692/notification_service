@@ -17,7 +17,7 @@ public interface MerchantMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "UpdatedAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(source = "name", target = "name")
     @Mapping(source = "email", target = "email")
     @Mapping(source = "webhook", target = "webhook")
@@ -31,7 +31,7 @@ public interface MerchantMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "UpdatedAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "login", ignore = true)
     @Mapping(target = "passwordHash", ignore = true)
     @Mapping(source = "name", target = "name")
@@ -50,6 +50,6 @@ public interface MerchantMapper {
     @Mapping(source = "taxNumber", target = "taxNumber")
     @Mapping(source = "login", target = "login")
     @Mapping(source = "createdAt", target = "createdAt")
-    @Mapping(source = "UpdatedAt", target = "updatedAt")
+    @Mapping(source = "updatedAt", target = "updatedAt")
     MerchantResponseDto toResponseDto(Merchant entity);
 }

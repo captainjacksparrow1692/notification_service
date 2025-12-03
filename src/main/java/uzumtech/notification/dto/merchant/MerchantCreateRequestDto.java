@@ -36,4 +36,10 @@ public class MerchantCreateRequestDto {
     @NotBlank(message = "Password не может быть пустым")
     @Size(min = 6, message = "Password должен быть минимум 6 символов")
     private String password;  // plain text пароль - будет хэшироваться в сервисе
+
+    public MerchantCreateRequestDto(String merchant1, String mail, String merchantCompany) {
+        this.name = merchant1;
+        this.email = mail;
+        this.webhook = merchantCompany;
+    }
 }

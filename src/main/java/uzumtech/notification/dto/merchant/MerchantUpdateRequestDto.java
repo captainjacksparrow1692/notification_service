@@ -23,6 +23,14 @@ public class MerchantUpdateRequestDto {
 
     private String taxNumber;
 
+
+
+    public MerchantUpdateRequestDto(String newMerchant, String mail, String newCompany) {
+        this.name = newMerchant;
+        this.email = mail;
+        this.webhook = newCompany;
+    }
+
     // login и password нельзя обновлять через этот DTO
     // Для смены пароля используется отдельный endpoint
 }

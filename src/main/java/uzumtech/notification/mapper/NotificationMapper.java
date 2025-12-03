@@ -20,7 +20,7 @@ public interface NotificationMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "UpdatedAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "message", ignore = true)
     @Mapping(target = "status", constant = "PENDING")
     @Mapping(source = "title", target = "title")
