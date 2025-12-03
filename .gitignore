@@ -35,3 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Firebase Credentials (SENSITIVE!) ###
+src/main/resources/firebase/**/notification.json
+*.json
+!gradle/wrapper/*.json
+
+### Environment files ###
+.env
+.env.local
+.env.*.local
