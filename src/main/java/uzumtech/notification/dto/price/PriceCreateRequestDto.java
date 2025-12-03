@@ -15,7 +15,7 @@ import lombok.Setter;
 public class PriceCreateRequestDto {
 
     @NotNull(message = "Price is required")
-    @Min(value = 0, message = "Price must be positive")
+    @Min(value = 0, message = "Price must be non-negative")
     private Long price;
 
     // При создании новой цены старая автоматически становится неактивной

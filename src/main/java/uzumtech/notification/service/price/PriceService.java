@@ -21,11 +21,18 @@ public class PriceService {
     private final PriceRepository priceRepository;
     private final PriceMapper priceMapper;
 
-    // Получить активный прайс (например, 85 сум за 1 SMS)
+    // Получить активный прайс как Entity (например, 85 сум за 1 SMS)
     @Transactional(readOnly = true)
     public Price getActivePrice() {
         return priceRepository.findByIsActiveTrue()
                 .orElseThrow(() -> new PriceNotFoundException("Активный прайс не найден"));
+    }
+
+    // Получить активный прайс как DTO
+    @Transactional(readOnly = true)
+    public PriceResponseDto getActivePriceDto() {
+        Price activePrice = getActivePrice();
+        return priceMapper.toResponseDto(activePrice);
     }
 
     // Создать новую цену (автоматически деактивирует старую активную цену)

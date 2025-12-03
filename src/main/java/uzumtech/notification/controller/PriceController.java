@@ -42,6 +42,18 @@ public class PriceController {
     }
 
     /**
+     * Получить текущую активную цену
+     * GET /api/prices/active
+     *
+     * @return активная цена (статус 200)
+     */
+    @GetMapping("/active")
+    public ResponseEntity<ResponseDto<PriceResponseDto>> getActivePrice() {
+        PriceResponseDto activePrice = priceService.getActivePriceDto();
+        return ResponseEntity.ok(ResponseDto.createSuccessResponse(activePrice));
+    }
+
+    /**
      * Получить информацию о цене по ID
      * GET /api/prices/{id}
      *
@@ -64,18 +76,6 @@ public class PriceController {
     public ResponseEntity<ResponseDto<List<PriceResponseDto>>> getAllPrices() {
         List<PriceResponseDto> prices = priceService.findAll();
         return ResponseEntity.ok(ResponseDto.createSuccessResponse(prices));
-    }
-
-    /**
-     * Получить текущую активную цену
-     * GET /api/prices/active
-     *
-     * @return активная цена (статус 200)
-     */
-    @GetMapping("/active")
-    public ResponseEntity<ResponseDto<PriceResponseDto>> getActivePrice() {
-        PriceResponseDto activePrice = priceService.findById(priceService.getActivePrice().getId());
-        return ResponseEntity.ok(ResponseDto.createSuccessResponse(activePrice));
     }
 
     /**

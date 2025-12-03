@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import uzumtech.notification.constant.enums.NotificationStatus;
 import uzumtech.notification.constant.enums.NotificationType;
-import uzumtech.notification.dto.push.NotificationSendRequestDto;
+import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.entity.Price;
 import uzumtech.notification.exception.notification.NotificationNotFoundException;

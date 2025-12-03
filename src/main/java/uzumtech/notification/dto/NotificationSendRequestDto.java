@@ -1,4 +1,4 @@
-package uzumtech.notification.dto.push;
+package uzumtech.notification.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

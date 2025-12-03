@@ -5,7 +5,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
-import uzumtech.notification.dto.push.NotificationSendRequestDto;
+import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.dto.ResponseDto;
 
 // Аспект для логирования всех запросов к контроллерам
