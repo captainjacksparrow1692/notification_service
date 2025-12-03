@@ -18,14 +18,14 @@ public interface PriceMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(source = "price", target = "price")
-    @Mapping(target = "isActive", constant = "true")
+    @Mapping(target = "active", constant = "true")
     Price toEntity(PriceCreateRequestDto dto);
 
     // Обновить существующий Entity из UpdateRequestDto
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "isActive", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(source = "price", target = "price")
     void updateEntityFromDto(PriceUpdateRequestDto dto, @MappingTarget Price entity);
 
@@ -33,7 +33,7 @@ public interface PriceMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(source = "id", target = "id")
     @Mapping(source = "price", target = "price")
-    @Mapping(source = "isActive", target = "isActive")
+    @Mapping(source = "active", target = "isActive")
     @Mapping(source = "createdAt", target = "createdAt")
     PriceResponseDto toResponseDto(Price entity);
 }
