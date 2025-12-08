@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    enabled: false
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres}
     username: ${DB_USERNAME:postgres}
@@ -15,6 +17,9 @@ spring:
     producer:
       acks: 1
       retries: 3
+    listener:
+      concurrency: 1  # Single consumer
+      ack-mode: manual
 
   jpa:
     hibernate:
@@ -54,7 +59,7 @@ app:
       partitions: 3
       replication-factor: 1
   firebase:
-    enabled: false
+    enabled: true
     # By default use the local firebase service account; can be overridden via APP_FIREBASE_LOCATION
     location: ${APP_FIREBASE_LOCATION:classpath:firebase/local/notification.json}
   provider:
