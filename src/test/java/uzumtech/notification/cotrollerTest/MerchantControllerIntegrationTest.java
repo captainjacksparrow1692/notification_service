@@ -52,10 +52,17 @@ class MerchantControllerIntegrationTest {
         return dto;
     }
 
+    // ... (остальные импорты и настройки класса)
+
     @Test
     void createMerchant_shouldReturn201() throws Exception {
         MerchantCreateRequestDto request = new MerchantCreateRequestDto(
-                "merchant1", "merchant@mail.com", "Merchant Company"
+                "Merchant Company",
+                "merchant@mail.com",
+                "https://merchant.uz/hook",
+                "1234567890",
+                "merchant1",
+                "securePassword123"
         );
 
         Mockito.when(merchantService.create(any())).thenReturn(mockMerchant());
@@ -63,7 +70,7 @@ class MerchantControllerIntegrationTest {
         mockMvc.perform(post("/api/merchants")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
+                .andExpect(status().isCreated()) // Ожидаем 201
                 .andExpect(jsonPath("$.data.login").value(mockMerchant().getLogin()))
                 .andExpect(jsonPath("$.data.email").value(mockMerchant().getEmail()));
     }
