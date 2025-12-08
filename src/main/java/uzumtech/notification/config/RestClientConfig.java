@@ -13,10 +13,17 @@ public class RestClientConfig {
 
     private final AppProperties.Provider provider;
 
+    // Билдер RestClient для повторного использования
+    @Bean
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
+    }
+
+    // Клиент Eskiz с базовым URL из настроек
     @Bean
     public RestClient eskizRestClient() {
-        return RestClient.builder()
-            .baseUrl(provider.getUrl())
-            .build();
+        return restClientBuilder()
+                .baseUrl(provider.getUrl())
+                .build();
     }
 }

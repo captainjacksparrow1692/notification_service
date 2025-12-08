@@ -1,9 +1,11 @@
 package uzumtech.notification.service.sender;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uzumtech.notification.constant.enums.NotificationStatus;
@@ -11,7 +13,6 @@ import uzumtech.notification.constant.enums.NotificationType;
 import uzumtech.notification.dto.NotificationSendRequestDto;
 import uzumtech.notification.dto.ResponseDto;
 import uzumtech.notification.dto.push.NotificationSendResponseDto;
-import uzumtech.notification.dto.push.PushResult;
 import uzumtech.notification.dto.webhook.WebhookPayloadDto;
 import uzumtech.notification.entity.Notification;
 import uzumtech.notification.mapper.NotificationMapper;
@@ -23,18 +24,19 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-public class PushNotificationSender implements NotificationSender {
+@Slf4j
+public class EmailNotificationSender implements NotificationSender {
 
-    private final NotificationRepository notificationRepository;
-    private final MerchantRepository merchantRepository;
+    private final JavaMailSender mailSender;
     private final NotificationMapper notificationMapper;
-    private final FirebaseMessaging firebaseMessaging;
+    private final MerchantRepository merchantRepository;
+    private final NotificationRepository notificationRepository;
     private final WebhookService webhookService;
 
     @Override
     @Transactional
     public ResponseDto<NotificationSendResponseDto> sendNotification(NotificationSendRequestDto notificationDto) {
-        Notification entity = notificationMapper.toEntity(notificationDto, merchantRepository);
+        Notification email = notificationMapper.toEntity(notificationDto, merchantRepository);
 
         if (notificationDto.getIdempotencyKey() != null) {
             var existing = notificationRepository.findByIdempotencyKey(notificationDto.getIdempotencyKey());
@@ -44,41 +46,60 @@ public class PushNotificationSender implements NotificationSender {
                         new NotificationSendResponseDto(existing.get().getId())
                     );
                 }
-                entity = existing.get();
+                email = existing.get();
             }
         }
 
-        entity.setIdempotencyKey(notificationDto.getIdempotencyKey());
+        email.setIdempotencyKey(notificationDto.getIdempotencyKey());
+        email.setStatus(NotificationStatus.PENDING);
+        notificationRepository.save(email);
 
-        // Отправляем push и сохраняем результат
-        var result = sendPush(notificationDto);
+        try {
+            // Отправляем письмо через SMTP
+            sendEmail(email.getRecipient(), email.getTitle(), email.getBody());
 
-        entity.setStatus(result.getStatus());
-        entity.setMessage(result.getMessage());
+            email.setStatus(NotificationStatus.SENT);
+            email.setMessage("Email sent successfully");
+            email.setDeliveredAt(LocalDateTime.now());
+            email = notificationRepository.save(email);
 
-        if (result.isSuccess()) {
-            entity.setDeliveredAt(LocalDateTime.now());
-        }
+            // Уведомляем мерчанта через webhook
+            sendWebhookNotification(email);
 
-        var savedNotification = notificationRepository.save(entity);
-
-        sendWebhookNotification(savedNotification);
-
-        if (result.isSuccess()) {
             return ResponseDto.createSuccessResponse(
-                new NotificationSendResponseDto(savedNotification.getId())
+                    new NotificationSendResponseDto(email.getId())
             );
+
+        } catch (Exception e) {
+            email.setStatus(NotificationStatus.FAILED);
+            email.setMessage(e.getMessage());
+            notificationRepository.save(email);
+
+            // Отправляем webhook о неуспешной попытке
+            sendWebhookNotification(email);
+
+            throw new RuntimeException("Email sending failed: ", e);
         }
-        return ResponseDto.createErrorResponse(result.getMessage());
     }
 
-    // Отправляем webhook с результатом отправки
+    private void sendEmail(String to, String subject, String text) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(text, true); // true = HTML content
+
+        mailSender.send(message);
+    }
+
+    // Отправляем webhook с результатом
     private void sendWebhookNotification(Notification notification) {
         String webhookUrl = notification.getMerchant().getWebhook();
 
         WebhookPayloadDto payload = WebhookPayloadDto.builder()
                 .notificationId(notification.getId())
-                .type(NotificationType.PUSH)
+                .type(NotificationType.EMAIL)
                 .status(notification.getStatus())
                 .receiver(notification.getRecipient())
                 .message(notification.getMessage())
@@ -92,25 +113,6 @@ public class PushNotificationSender implements NotificationSender {
 
     @Override
     public NotificationType getNotificationType() {
-        return NotificationType.PUSH;
-    }
-
-    // Непосредственно отправка push через Firebase
-    private PushResult sendPush(NotificationSendRequestDto notificationDto) {
-        try {
-            Message message = Message.builder()
-                .setNotification(com.google.firebase.messaging.Notification.builder()
-                    .setTitle(notificationDto.getTitle())
-                    .setBody(notificationDto.getBody())
-                    .build())
-                .setToken(notificationDto.getReceiver())
-                .build();
-
-            var response = firebaseMessaging.send(message);
-
-            return new PushResult(NotificationStatus.SENT, response, true);
-        } catch (FirebaseMessagingException e) {
-            return new PushResult(NotificationStatus.FAILED, e.getMessage(), false);
-        }
+        return NotificationType.EMAIL;
     }
 }

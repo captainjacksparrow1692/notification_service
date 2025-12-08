@@ -8,34 +8,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// DTO для создания нового мерчанта
-// Клиент отправляет эти данные при регистрации
+/**
+ * DTO for creating a merchant account.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MerchantCreateRequestDto {
 
-    @NotBlank(message = "Name не может быть пустым")
+    @NotBlank(message = "Name must not be blank")
     private String name;
 
-    @NotBlank(message = "Email не может быть пустым")
-    @Email(message = "Неверный формат email")
+    @NotBlank(message = "Email must not be blank")
+    @Email(message = "Email format is invalid")
     private String email;
 
-    @NotBlank(message = "Webhook не может быть пустым")
+    @NotBlank(message = "Webhook URL must not be blank")
     private String webhook;
 
-    @NotBlank(message = "TaxNumber не может быть пустым")
+    @NotBlank(message = "Tax number must not be blank")
     private String taxNumber;
 
-    @NotBlank(message = "Login не может быть пустым")
-    @Size(min = 3, max = 50, message = "Login должен быть от 3 до 50 символов")
+    @NotBlank(message = "Login must not be blank")
+    @Size(min = 3, max = 50, message = "Login length must be between 3 and 50 characters")
     private String login;
 
-    @NotBlank(message = "Password не может быть пустым")
-    @Size(min = 6, message = "Password должен быть минимум 6 символов")
-    private String password;  // plain text пароль - будет хэшироваться в сервисе
+    @NotBlank(message = "Password must not be blank")
+    @Size(min = 6, message = "Password length must be at least 6 characters")
+    private String password;  // plain text password - will be encoded later
 
     public MerchantCreateRequestDto(String merchant1, String mail, String merchantCompany) {
         this.name = merchant1;

@@ -30,4 +30,8 @@ public class NotificationSendRequestDto {
 
     @NotBlank(message = "Receiver is required")
     private String receiver;
+
+    // Idempotency key для предотвращения дублирования
+    // Генерируется на стороне клиента или в Producer
+    private String idempotencyKey;
 }

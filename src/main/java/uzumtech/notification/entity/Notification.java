@@ -18,12 +18,20 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "notifications")
+@Table(name = "notifications",
+    indexes = {
+        @Index(name = "idx_idempotency_key", columnList = "idempotency_key", unique = true)
+    }
+)
 public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // Idempotency key для предотвращения дублирования
+    @Column(name = "idempotency_key", unique = true, nullable = true, length = 100)
+    private String idempotencyKey;
 
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;

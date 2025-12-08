@@ -9,6 +9,7 @@ import uzumtech.notification.entity.Notification;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long>,
@@ -23,4 +24,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             LocalDateTime start,
             LocalDateTime end
     );
+
+    // Поиск уведомления по idempotency key для обеспечения идемпотентности
+    Optional<Notification> findByIdempotencyKey(String idempotencyKey);
 }

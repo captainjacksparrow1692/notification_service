@@ -15,8 +15,10 @@ import uzumtech.notification.repository.NotificationRepository;
 import uzumtech.notification.service.kafka.producer.NotificationKafkaProducer;
 import uzumtech.notification.service.price.PriceService;
 
+import java.util.UUID;
+
 /**
- * Сервис для обработки уведомлений и отправки событий в Kafka + бизнес-логика цены
+ * Handles notification creation, pricing, status management and Kafka dispatch.
  */
 @Service
 @RequiredArgsConstructor
@@ -29,56 +31,62 @@ public class NotificationService {
     private final MerchantRepository merchantRepository;
 
     /**
-     * Отправить уведомление — принимает DTO, конвертирует в Entity, сохраняет в БД, проставляет цену и публикует событие в Kafka.
+     * Build Notification from DTO and queue it.
      */
+    // Формируем сущность из DTO и передаём на отправку
     @Transactional
     public Notification sendFromDto(NotificationSendRequestDto dto) {
-        // Конвертируем DTO в Entity
         Notification notification = notificationMapper.toEntity(dto, merchantRepository);
-
         return send(notification);
     }
 
     /**
-     * Отправить уведомление — сохраняет в БД, проставляет цену и публикует событие в Kafka.
+     * Persist notification, calculate price, and send to Kafka.
      */
+    // Сохраняем уведомление, считаем цену и отправляем в Kafka
     @Transactional
     public Notification send(Notification notification) {
-        Long priceValue;
-
         if (notification == null) {
-            throw new IllegalArgumentException("Notification не может быть null");
+            throw new IllegalArgumentException("Notification must not be null");
         }
         if (notification.getRecipient() == null || notification.getRecipient().isBlank()) {
-            throw new IllegalArgumentException("Recipient не может быть пустым");
+            throw new IllegalArgumentException("Recipient must not be blank");
         }
 
-        //    БИЗНЕС-ЛОГИКА PRICE
+        if (notification.getIdempotencyKey() != null && !notification.getIdempotencyKey().isBlank()) {
+            return repository.findByIdempotencyKey(notification.getIdempotencyKey())
+                .orElseGet(() -> processAndSend(notification));
+        }
+
+        notification.setIdempotencyKey(UUID.randomUUID().toString());
+        return processAndSend(notification);
+    }
+
+    // Общая логика подготовки, сохранения и публикации
+    private Notification processAndSend(Notification notification) {
+        Long priceValue;
+
         if (notification.getType() == NotificationType.SMS) {
-            Price price = priceService.getActivePrice();  // только для SMS
+            Price price = priceService.getActivePrice();
             priceValue = price.getPrice();
         } else {
-            priceValue = 0L; // EMAIL и PUSH бесплатные
+            priceValue = 0L; // EMAIL and PUSH are free here
         }
 
         notification.setPrice(priceValue);
-
-        // Устанавливаем статус
         notification.setStatus(NotificationStatus.QUEUED);
 
-        // Сохраняем в БД
         Notification saved = repository.save(notification);
 
-        // DTO для Kafka
         NotificationSendRequestDto message = NotificationSendRequestDto.builder()
                 .type(saved.getType())
                 .title(saved.getTitle())
                 .body(saved.getBody())
                 .receiver(saved.getRecipient())
                 .merchantId(saved.getMerchantId())
+                .idempotencyKey(saved.getIdempotencyKey())
                 .build();
 
-        // Асинхронная отправка
         kafkaProducer.send(message)
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
@@ -92,21 +100,24 @@ public class NotificationService {
     }
 
     /**
-     * Отдельные транзакции для обновления статуса после отправки Kafka
+     * Mark notification as sent after successful Kafka dispatch.
      */
+    // Отмечаем как отправленное после удачной публикации
     @Transactional
     public void markAsSent(Long notificationId) {
         updateStatus(notificationId, NotificationStatus.SENT);
     }
 
+    // Отмечаем как неуспешное при ошибке публикации
     @Transactional
     public void markAsFailed(Long notificationId, Throwable ex) {
         updateStatus(notificationId, NotificationStatus.FAILED);
     }
 
     /**
-     * Обновить статус уведомления
+     * Update notification status.
      */
+    // Обновляем статус уведомления
     @Transactional
     public Notification updateStatus(Long id, NotificationStatus status) {
         Notification notification = repository.findById(id)
@@ -117,8 +128,9 @@ public class NotificationService {
     }
 
     /**
-     * Получить уведомление по ID
+     * Find notification by id.
      */
+    // Находим уведомление по id или бросаем исключение
     public Notification findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new NotificationNotFoundException("Notification not found with id: " + id));

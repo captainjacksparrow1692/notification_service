@@ -10,12 +10,12 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-//Глобальный обработчик исключений для всего приложения
-//Перехватывает все исключения и возвращает единообразный формат ошибок
+/**
+ * Centralized error handling for REST controllers.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    //Обработка всех кастомных NotificationException и его наследников
     @ExceptionHandler(NotificationException.class)
     public ResponseEntity<Map<String, Object>> handleNotificationException(NotificationException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
@@ -38,14 +38,13 @@ public class GlobalExceptionHandler {
             .body(errorResponse);
     }
 
-    //Обработка ошибок валидации от @Valid аннотации
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, Object> errorResponse = new HashMap<>();
 
         Map<String, Object> error = new HashMap<>();
         error.put("code", "VALIDATION_ERROR");
-        error.put("message", "Ошибка валидации данных");
+        error.put("message", "Validation failed");
 
         Map<String, String> fieldErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(fieldError ->
@@ -61,14 +60,13 @@ public class GlobalExceptionHandler {
             .body(errorResponse);
     }
 
-    //Обработка всех остальных непредвиденных исключений
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         Map<String, Object> errorResponse = new HashMap<>();
 
         Map<String, Object> error = new HashMap<>();
         error.put("code", "INTERNAL_SERVER_ERROR");
-        error.put("message", "Внутренняя ошибка сервера");
+        error.put("message", "Unexpected error occurred");
 
         Map<String, String> details = new HashMap<>();
         details.put("exception", ex.getClass().getSimpleName());

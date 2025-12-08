@@ -25,6 +25,7 @@ public interface NotificationMapper {
     @Mapping(target = "message", ignore = true)
     @Mapping(target = "price", ignore = true)
     @Mapping(target = "status", constant = "PENDING")
+    @Mapping(source = "idempotencyKey", target = "idempotencyKey")
     @Mapping(source = "title", target = "title")
     @Mapping(source = "body", target = "body")
     @Mapping(source = "type", target = "type")

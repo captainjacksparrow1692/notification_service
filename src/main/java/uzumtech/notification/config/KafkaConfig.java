@@ -9,17 +9,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.util.backoff.ExponentialBackOff;
 import uzumtech.notification.dto.NotificationSendRequestDto;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Конфигурация Kafka для отправки и получения уведомлений
- */
+// Конфигурация продюсеров/консьюмеров Kafka для работы с уведомлениями
 @Configuration
 public class KafkaConfig {
 
@@ -41,7 +41,7 @@ public class KafkaConfig {
     @Value("${spring.kafka.producer.retries}")
     private Integer retries;
 
-    // Producer для отправки уведомлений в Kafka
+    // Фабрика продюсеров для отправки NotificationSendRequestDto
     @Bean
     public ProducerFactory<String, NotificationSendRequestDto> producerFactory() {
         Map<String, Object> config = new HashMap<>();
@@ -53,22 +53,25 @@ public class KafkaConfig {
         return new DefaultKafkaProducerFactory<>(config);
     }
 
+    // KafkaTemplate для SMS отправок
     @Bean("smsKafkaTemplate")
     public KafkaTemplate<String, NotificationSendRequestDto> smsKafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
+    // KafkaTemplate для push отправок
     @Bean("pushKafkaTemplate")
     public KafkaTemplate<String, NotificationSendRequestDto> pushKafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
+    // KafkaTemplate для email отправок
     @Bean("emailKafkaTemplate")
     public KafkaTemplate<String, NotificationSendRequestDto> emailKafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
-    // Consumer для получения уведомлений из Kafka
+    // Фабрика консьюмеров для чтения NotificationSendRequestDto
     @Bean
     public ConsumerFactory<String, NotificationSendRequestDto> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
@@ -79,16 +82,26 @@ public class KafkaConfig {
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
-        config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        config.put(JsonDeserializer.TRUSTED_PACKAGES, "uzumtech.notification.dto");
         config.put(JsonDeserializer.VALUE_DEFAULT_TYPE, NotificationSendRequestDto.class);
         return new DefaultKafkaConsumerFactory<>(config);
     }
 
+    // Контейнер слушателей с обработчиком ошибок
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, NotificationSendRequestDto> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, NotificationSendRequestDto> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
+        factory.setCommonErrorHandler(errorHandler());
         return factory;
+    }
+
+    // ErrorHandler с экспоненциальным бэкоффом и повторными попытками
+    @Bean
+    public DefaultErrorHandler errorHandler() {
+        ExponentialBackOff exponentialBackOff = new ExponentialBackOff(1000, 2);
+        exponentialBackOff.setMaxElapsedTime(10000);
+        return new DefaultErrorHandler(exponentialBackOff);
     }
 }

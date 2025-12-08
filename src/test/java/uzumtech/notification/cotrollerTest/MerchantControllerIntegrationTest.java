@@ -4,24 +4,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import uzumtech.notification.controller.MerchantController;
 import uzumtech.notification.dto.merchant.MerchantCreateRequestDto;
 import uzumtech.notification.dto.merchant.MerchantResponseDto;
 import uzumtech.notification.dto.merchant.MerchantUpdateRequestDto;
 import uzumtech.notification.service.MerchantService;
+import uzumtech.notification.service.price.MerchantSmsBillingService;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@uzumtech.notification.cotrollerTest.AutoConfigureMockMvc
-public class MerchantControllerIntegrationTest {
+@WebMvcTest(MerchantController.class)
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc(addFilters = false)
+class MerchantControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,8 +37,11 @@ public class MerchantControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private MerchantService merchantService;
+
+    @MockitoBean
+    private MerchantSmsBillingService billingService;
 
     private MerchantResponseDto mockMerchant() {
         MerchantResponseDto dto = new MerchantResponseDto();
@@ -41,9 +52,6 @@ public class MerchantControllerIntegrationTest {
         return dto;
     }
 
-    // --------------------------------------------------------------
-    // CREATE
-    // --------------------------------------------------------------
     @Test
     void createMerchant_shouldReturn201() throws Exception {
         MerchantCreateRequestDto request = new MerchantCreateRequestDto(
@@ -56,12 +64,10 @@ public class MerchantControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.login").value("merchant1"));
+                .andExpect(jsonPath("$.data.login").value(mockMerchant().getLogin()))
+                .andExpect(jsonPath("$.data.email").value(mockMerchant().getEmail()));
     }
 
-    // --------------------------------------------------------------
-    // GET BY ID
-    // --------------------------------------------------------------
     @Test
     void getMerchantById_shouldReturn200() throws Exception {
         Mockito.when(merchantService.findById(1L)).thenReturn(mockMerchant());
@@ -71,9 +77,6 @@ public class MerchantControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.email").value("merchant@mail.com"));
     }
 
-    // --------------------------------------------------------------
-    // GET BY LOGIN
-    // --------------------------------------------------------------
     @Test
     void getMerchantByLogin_shouldReturn200() throws Exception {
         Mockito.when(merchantService.findByLogin("merchant1")).thenReturn(mockMerchant());
@@ -83,9 +86,6 @@ public class MerchantControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.login").value("merchant1"));
     }
 
-    // --------------------------------------------------------------
-    // GET BY EMAIL
-    // --------------------------------------------------------------
     @Test
     void getMerchantByEmail_shouldReturn200() throws Exception {
         Mockito.when(merchantService.findByEmail("merchant@mail.com")).thenReturn(mockMerchant());
@@ -95,9 +95,6 @@ public class MerchantControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.email").value("merchant@mail.com"));
     }
 
-    // --------------------------------------------------------------
-    // GET ALL
-    // --------------------------------------------------------------
     @Test
     void getAllMerchants_shouldReturn200() throws Exception {
         Mockito.when(merchantService.findAll()).thenReturn(List.of(mockMerchant()));
@@ -107,9 +104,6 @@ public class MerchantControllerIntegrationTest {
                 .andExpect(jsonPath("$.data[0].login").value("merchant1"));
     }
 
-    // --------------------------------------------------------------
-    // UPDATE
-    // --------------------------------------------------------------
     @Test
     void updateMerchant_shouldReturn200() throws Exception {
         MerchantUpdateRequestDto request = new MerchantUpdateRequestDto(
@@ -129,9 +123,6 @@ public class MerchantControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.login").value("newMerchant"));
     }
 
-    // --------------------------------------------------------------
-    // DELETE
-    // --------------------------------------------------------------
     @Test
     void deleteMerchant_shouldReturn204() throws Exception {
         Mockito.doNothing().when(merchantService).delete(1L);
@@ -140,9 +131,6 @@ public class MerchantControllerIntegrationTest {
                 .andExpect(status().isNoContent());
     }
 
-    // --------------------------------------------------------------
-    // HEAD EXISTS
-    // --------------------------------------------------------------
     @Test
     void checkMerchantExists_shouldReturn200() throws Exception {
         Mockito.when(merchantService.exists(1L)).thenReturn(true);

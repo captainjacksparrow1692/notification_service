@@ -12,10 +12,7 @@ import uzumtech.notification.entity.Notification;
 import uzumtech.notification.mapper.NotificationMapper;
 import uzumtech.notification.service.NotificationService;
 
-/**
- * Контроллер для отправки уведомлений
- * Логирование вынесено в ControllerLoggingAspect
- */
+// REST-эндпоинты для работы с уведомлениями (логируются аспектом ControllerLoggingAspect)
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
@@ -24,21 +21,17 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;
 
-    /**
-     * Отправить уведомление (добавляет в очередь Kafka)
-     */
+    // Принимаем запрос на отправку уведомления (сохранение + публикация в Kafka)
     @PostMapping("/send")
     public ResponseEntity<ResponseDto<Long>> sendNotification(@Valid @RequestBody NotificationSendRequestDto request) {
-        // Сервис сам конвертирует DTO в entity и сохраняет
         Notification saved = notificationService.sendFromDto(request);
 
-        // Возвращаем ID созданного уведомления
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ResponseDto.createSuccessResponse(saved.getId()));
     }
 
-    // Получить уведомление по ID
+    // Возвращаем уведомление по ID
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto<NotificationResponseDto>> getNotification(@PathVariable Long id) {
         Notification notification = notificationService.findById(id);

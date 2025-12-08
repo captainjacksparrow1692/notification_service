@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/postgres
-    username: postgres
-    password: 9376570167
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/postgres}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   kafka:
@@ -10,7 +10,7 @@ spring:
     consumer:
       group-id: notification-service-group
       auto-offset-reset: earliest
-      enable-auto-commit: true
+      enable-auto-commit: false
     producer:
       acks: 1
       retries: 3
@@ -20,6 +20,22 @@ spring:
       ddl-auto: create-drop
       dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 openapi:
   title: notification
@@ -41,3 +57,10 @@ app:
     location: classpath:firebase/local/notification.json
   provider:
     url: https://notify.eskiz.uz/api/
+  sms:
+    token: ${SMS_API_TOKEN:your-eskiz-token}
+    sender-number: ${SMS_SENDER_NUMBER:4546}
+  security:
+    basic:
+      username: ${APP_SECURITY_BASIC_USERNAME:admin}
+      password: ${APP_SECURITY_BASIC_PASSWORD:admin}

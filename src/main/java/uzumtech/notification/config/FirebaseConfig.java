@@ -24,6 +24,7 @@ public class FirebaseConfig {
     private static final String APP_NAME = "NotificationApp";
     private final AppProperties appProperties;
 
+    // Настраиваем FirebaseMessaging при включённом профиле
     @Bean
     public FirebaseMessaging firebaseMessaging() {
         log.info("Initializing Firebase Messaging...");
@@ -37,11 +38,9 @@ public class FirebaseConfig {
                 );
             }
 
-            // Read and log file info (without exposing secrets)
             log.info("Loading Firebase config from: {}", resource.getDescription());
             log.info("File readable: {}", resource.isReadable());
 
-            // Create credentials with explicit scopes
             GoogleCredentials credentials;
             try (InputStream inputStream = resource.getInputStream()) {
                 credentials = GoogleCredentials.fromStream(inputStream)
@@ -51,10 +50,9 @@ public class FirebaseConfig {
                     ));
             }
 
-            // Test credential refresh before proceeding
             log.info("Testing credential refresh...");
             credentials.refresh();
-            log.info("✓ Credential refresh successful");
+            log.info("Credential refresh successful");
 
             FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(credentials)
@@ -69,15 +67,15 @@ public class FirebaseConfig {
                 });
 
             FirebaseMessaging messaging = FirebaseMessaging.getInstance(firebaseApp);
-            log.info("✓ Firebase Messaging initialized successfully");
+            log.info("Firebase Messaging initialized successfully");
 
             return messaging;
 
         } catch (IOException e) {
-            log.error("✗ Failed to initialize Firebase - IOException: {}", e.getMessage(), e);
+            log.error("Failed to initialize Firebase - IOException: {}", e.getMessage(), e);
             throw new IllegalStateException("Firebase initialization failed: " + e.getMessage(), e);
         } catch (Exception e) {
-            log.error("✗ Failed to initialize Firebase - Unexpected error: {}", e.getMessage(), e);
+            log.error("Failed to initialize Firebase - Unexpected error: {}", e.getMessage(), e);
             throw new IllegalStateException("Firebase initialization failed", e);
         }
     }
