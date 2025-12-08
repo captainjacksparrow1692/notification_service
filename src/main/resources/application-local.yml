@@ -55,7 +55,8 @@ app:
       replication-factor: 1
   firebase:
     enabled: true
-    location: classpath:firebase/local/notification.json
+    # By default use the local firebase service account; can be overridden via APP_FIREBASE_LOCATION
+    location: ${APP_FIREBASE_LOCATION:classpath:firebase/local/notification.json}
   provider:
     url: https://notify.eskiz.uz/api/
   sms:
