@@ -5,8 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -22,6 +24,12 @@ public class NotificationApplication {
         var app = new SpringApplication(NotificationApplication.class);
         var env = app.run(args).getEnvironment();
         logApplicationStartup(env);
+    }
+
+    // Ensure startup log runs in tests and non-main entrypoints
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady(ApplicationReadyEvent event) {
+        logApplicationStartup(event.getApplicationContext().getEnvironment());
     }
 
     // Логируем полезные ссылки после старта
