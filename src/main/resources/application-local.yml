@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    enabled: false
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/postgres}
     username: ${DB_USERNAME:postgres}
@@ -15,6 +17,9 @@ spring:
     producer:
       acks: 1
       retries: 3
+    listener:
+      concurrency: 1  # Single consumer
+      ack-mode: manual
 
   jpa:
     hibernate:
